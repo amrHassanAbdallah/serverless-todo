@@ -3,6 +3,8 @@ import {TodoItem} from "../models/TodoItem";
 import {UpdateTodoRequest} from "../requests/UpdateTodoRequest";
 import * as uuid from "uuid";
 import * as AWS from "aws-sdk";
+import * as AWSXray from 'aws-xray-sdk'
+
 
 export interface TodosPersistence {
     createTodo(userId: string, newTodo: CreateTodoRequest): Promise<TodoItem>
@@ -21,6 +23,11 @@ interface UpdateParams {
     timestamp: string;
     update: UpdateTodoRequest;
 }
+function getDynamoClient(){
+    let client = new AWS.DynamoDB.DocumentClient();
+    AWSXray.captureAWSClient((client as any).service);
+    return client
+}
 
 export class DynamoDBTodosRepository implements TodosPersistence {
     client: AWS.DynamoDB.DocumentClient;
@@ -28,7 +35,7 @@ export class DynamoDBTodosRepository implements TodosPersistence {
     todoIdIndex: string;
 
     constructor() {
-        this.client = new AWS.DynamoDB.DocumentClient();
+        this.client =getDynamoClient()
         this.table = process.env.TODOS_TABLE
         this.todoIdIndex = process.env.TODOs_ID_INDEX
     }
@@ -75,7 +82,7 @@ export class DynamoDBTodosRepository implements TodosPersistence {
             TableName: this.table,
             Key: {
                 "userId": userId,
-                "timestamp":timestamp
+                "timestamp": timestamp
             },
             UpdateExpression: updateExpression,
             ExpressionAttributeNames: ExpressionAttributeNames,

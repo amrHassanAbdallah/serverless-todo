@@ -57,9 +57,10 @@ export async function deleteTodo(
 
 export async function getUploadUrl(
   idToken: string,
-  todoId: string
+  todoId: string,
+  fileExtenstion:string,
 ): Promise<string> {
-  const response = await Axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, '', {
+  const response = await Axios.post(`${apiEndpoint}/todos/${todoId}/attachment`, {file_type:fileExtenstion}, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${idToken}`
@@ -68,6 +69,11 @@ export async function getUploadUrl(
   return response.data.uploadUrl
 }
 
-export async function uploadFile(uploadUrl: string, file: Buffer): Promise<void> {
-  await Axios.put(uploadUrl, file)
+export async function uploadFile(uploadUrl: string, file: Buffer,filetype:string): Promise<void> {
+  var options = {
+    headers: {
+      'Content-Type': filetype
+    }
+  };
+  await Axios.put(uploadUrl, file,options)
 }

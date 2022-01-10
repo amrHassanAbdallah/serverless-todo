@@ -12,8 +12,8 @@ export async function getTodosForUser(userID: string): Promise<TodoItem[]> {
     return todosRepo.getTodosForUser(userID)
 }
 
-export async function createAttachmentPresignedUrl(todoId: string): Promise<string> {
-    return fileStorage.createAttachmentPresignedUrl(todoId)
+export async function createAttachmentPresignedUrl(todoId: string,filetype :string): Promise<string> {
+    return fileStorage.createAttachmentPresignedUrl(todoId,filetype)
 }
 
 export async function getTodoByID(userId: string, todoId: string): Promise<TodoItem> {
@@ -33,6 +33,9 @@ export async function updateTodo({userId, timestamp, update}: UpdateParams): Pro
 
 export async function deleteTodo(userId: string, todoId: string): Promise<void> {
     let todo = await todosRepo.getTodoByID(userId,todoId);
+    if (todo.attachmentUrl){
+        await fileStorage.deleteFile(todo.attachmentUrl)
+    }
     return todosRepo.deleteTodo(userId, todo.timestamp)
 }
 
@@ -40,6 +43,6 @@ export async function createTodo(userId: string, newTodo: CreateTodoRequest): Pr
     return todosRepo.createTodo(userId, newTodo)
 }
 
-export function getImageURL(imageName: string): string {
-    return fileStorage.getImageURL(imageName)
+export function getImageURL(imageName: string,fileType:string): string {
+    return fileStorage.getImageURL(imageName,fileType)
 }
