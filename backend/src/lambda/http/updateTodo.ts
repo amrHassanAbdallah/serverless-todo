@@ -5,7 +5,7 @@ import middy from '@middy/core'
 import cors from '@middy/http-cors'
 import httpErrorHandler from "@middy/http-error-handler";
 
-import {getTodoByID, updateTodo} from '../../businessLogic/todos'
+import {getTodoByID, updateTodo} from '../../application/todos'
 import {UpdateTodoRequest} from '../../requests/UpdateTodoRequest'
 import {getUserId} from '../utils'
 

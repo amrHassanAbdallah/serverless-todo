@@ -4,7 +4,7 @@ import {APIGatewayProxyEvent, APIGatewayProxyResult} from 'aws-lambda'
 import middy from '@middy/core'
 import cors from '@middy/http-cors'
 
-import {getTodosForUser as getTodosForUser} from '../../businessLogic/todos'
+import {getTodosForUser as getTodosForUser} from '../../application/todos'
 import {getUserId} from '../utils';
 import httpErrorHandler from "@middy/http-error-handler";
 

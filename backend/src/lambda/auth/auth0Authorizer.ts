@@ -21,7 +21,6 @@ const jwksClient = jwks({
 export const handler = async (
     event: CustomAuthorizerEvent
 ): Promise<CustomAuthorizerResult> => {
-    console.log("hereeeeeeeeeeeeeeeeee")
     logger.info('Authorizing a user', event.authorizationToken)
     try {
         const jwtToken = await verifyToken(event.authorizationToken)

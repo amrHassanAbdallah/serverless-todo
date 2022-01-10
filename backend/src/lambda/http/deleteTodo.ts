@@ -5,7 +5,7 @@ import middy from '@middy/core'
 import cors from '@middy/http-cors'
 import httpErrorHandler from "@middy/http-error-handler";
 
-import { deleteTodo } from '../../businessLogic/todos'
+import { deleteTodo } from '../../application/todos'
 import { getUserId } from '../utils'
 
 export const handler = middy(
