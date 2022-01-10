@@ -6,4 +6,5 @@ export interface UpdateTodoRequest {
   dueDate?: string
   done?: boolean
   imageURL?:string
+  todoId?:string
 }

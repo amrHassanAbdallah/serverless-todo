@@ -10,11 +10,14 @@ import {getUserId} from '../utils'
 
 export const handler = middy(
     async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+        //todo refactor the below snippet to move the logic into the business layer
         const todoId = event.pathParameters.todoId
         const userId = getUserId(event)
-        if (getTodoByID(userId, todoId)) {
+        let oldTodo = await getTodoByID(userId, todoId)
+        if (oldTodo) {
             const url = await createAttachmentPresignedUrl(todoId)
-            await updateTodo({userId, todoId, update: {imageURL: getImageURL(todoId)}})
+            //todo replace this logic by something event driven as the FE might fail to upload for any reason
+            await updateTodo({userId, timestamp:oldTodo.timestamp, update: {imageURL: getImageURL(todoId)}})
             return {
                 statusCode: 200,
                 body: JSON.stringify({

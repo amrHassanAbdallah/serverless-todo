@@ -2,7 +2,7 @@ import {CreateTodoRequest} from "../requests/CreateTodoRequest";
 import {TodoItem} from "../models/TodoItem";
 import {UpdateTodoRequest} from "../requests/UpdateTodoRequest";
 import * as uuid from "uuid";
-import {DocumentClient} from "aws-sdk/lib/dynamodb/document_client";
+import * as AWS from "aws-sdk";
 
 export interface TodosPersistence {
     createTodo(userId: string, newTodo: CreateTodoRequest): Promise<TodoItem>
@@ -13,22 +13,22 @@ export interface TodosPersistence {
 
     getTodoByID(userId: string, todoId: string): Promise<TodoItem>
 
-    updateTodo({userId, todoId, update}: UpdateParams): Promise<TodoItem>
+    updateTodo({userId, timestamp, update}: UpdateParams): Promise<TodoItem>
 }
 
 interface UpdateParams {
     userId: string;
-    todoId: string;
+    timestamp: string;
     update: UpdateTodoRequest;
 }
 
 export class DynamoDBTodosRepository implements TodosPersistence {
-    client: DocumentClient;
+    client: AWS.DynamoDB.DocumentClient;
     table: string;
     todoIdIndex: string;
 
     constructor() {
-        this.client = new DocumentClient();
+        this.client = new AWS.DynamoDB.DocumentClient();
         this.table = process.env.TODOS_TABLE
         this.todoIdIndex = process.env.TODOs_ID_INDEX
     }
@@ -49,16 +49,18 @@ export class DynamoDBTodosRepository implements TodosPersistence {
         const result = await this.client.query({
             TableName: this.table,
             IndexName: this.todoIdIndex,
-            KeyConditionExpression: 'userId = :userId and todoId = :todoId ',
+            KeyConditionExpression: 'todoId = :todoId ',
+            FilterExpression: 'userId = :userId',
             ExpressionAttributeValues: {
-                ':userId': userId,
                 ':todoId': todoId,
-            }
+                ':userId': userId,
+            },
+
         }).promise()
         return result.Items[0]
     }
 
-    async updateTodo({userId, todoId, update}: UpdateParams): Promise<TodoItem> {
+    async updateTodo({userId, timestamp, update}: UpdateParams): Promise<TodoItem> {
         let updateExpression = 'set';
         let ExpressionAttributeNames = {};
         let ExpressionAttributeValues = {};
@@ -72,8 +74,8 @@ export class DynamoDBTodosRepository implements TodosPersistence {
         return (await this.client.update({
             TableName: this.table,
             Key: {
-                "todoId": todoId,
                 "userId": userId,
+                "timestamp":timestamp
             },
             UpdateExpression: updateExpression,
             ExpressionAttributeNames: ExpressionAttributeNames,
@@ -81,12 +83,12 @@ export class DynamoDBTodosRepository implements TodosPersistence {
         }).promise()).Attributes
     }
 
-    async deleteTodo(userId: string, todoId: string): Promise<void> {
+    async deleteTodo(userId: string, timestamp: string): Promise<void> {
         var params = {
             TableName: this.table,
             Key: {
-                "todoId": todoId,
                 "userId": userId,
+                "timestamp": timestamp,
             },
         };
         await this.client.delete(params).promise()

@@ -8,11 +8,11 @@ export interface FileStorage {
 
 export class S3FileStorage implements FileStorage{
     bucket:string;
-    expire:string;
+    expire:number;
     client: S3;
     constructor() {
         this.bucket = process.env.ATTACHMENT_S3_BUCKET
-        this.expire = process.env.SIGNED_URL_EXPIRATION
+        this.expire = parseInt(process.env.SIGNED_URL_EXPIRATION)
         this.client = new S3({
             signatureVersion:'v4'
         })

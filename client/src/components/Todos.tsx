@@ -52,11 +52,11 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
         dueDate
       })
       this.setState({
-        todos: [...this.state.todos, newTodo],
+        todos: [newTodo,...this.state.todos],
         newTodoName: ''
       })
-    } catch {
-      alert('Todo creation failed')
+    } catch (err){
+      alert('Todo creation failed '+err)
     }
   }
 
